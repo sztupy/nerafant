@@ -187,15 +187,34 @@ function downloadImage(e) {
     }
 }
 
-for (var type = 0; type <= 2; type++) {
-    for (var i = 0; i < images[type].length; i++) {
-        var preloadLink = document.createElement("link");
-        preloadLink.href = getFileName(type, i);
-        preloadLink.rel = "prefetch";
-        preloadLink.as = "image";
-        preloadLink.addEventListener("load", loaded);
-        document.head.appendChild(preloadLink);
+var support = function support(feature){
+    var tokenList;
+    var fakeLink = document.createElement('link');
+    try {
+        if(fakeLink.relList && _.isFunction(fakeLink.relList.supports)){
+            return  fakeLink.relList.supports(feature);
+        }
+    } catch(err){
+        return false;
     }
+};
+var isPrefetchSupported = support('prefetch');
+var isPreloadSupported = support('preload');
+
+if (isPrefetchSupported || isPreloadSupported) {
+    for (var type = 0; type <= 2; type++) {
+        for (var i = 0; i < images[type].length; i++) {
+            var preloadLink = document.createElement("link");
+            preloadLink.href = getFileName(type, i);
+            preloadLink.rel = isPrefetchSupported ? "prefetch" : "preload";
+            preloadLink.as = "image";
+            preloadLink.addEventListener("load", loaded);
+            document.head.appendChild(preloadLink);
+        }
+    }
+} else {
+    notPreLoadedImages = 1;
+    loaded();
 }
 
 document.getElementById("downloadButton").addEventListener("click", downloadImage, false);

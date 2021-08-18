@@ -191,8 +191,8 @@ var support = function support(feature){
     var tokenList;
     var fakeLink = document.createElement('link');
     try {
-        if(fakeLink.relList && _.isFunction(fakeLink.relList.supports)){
-            return  fakeLink.relList.supports(feature);
+        if(fakeLink.relList && fakeLink.relList.supports){
+            return fakeLink.relList.supports(feature);
         }
     } catch(err){
         return false;

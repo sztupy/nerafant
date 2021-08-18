@@ -62,7 +62,8 @@ var images =
         'TER']
     ];
 
-var notPreLoadedImages = images[0].length + images[1].length + images[2].length;
+var numImages = images[0].length + images[1].length + images[2].length;
+var notPreLoadedImages = numImages;
 
 var selected = [0,0,0];
 
@@ -78,6 +79,10 @@ function getFileName(type, pos) {
 }
 
 function getAnother() {
+    if (notPreLoadedImages > 0) {
+        return;
+    }
+
     for (var type = 0; type <= 2; type++) {
         animatedChange(type);
     }
@@ -120,6 +125,10 @@ function randomChange(type) {
 }
 
 function change(type) {
+    if (notPreLoadedImages > 0) {
+        return;
+    }
+
     var num = (selected[type] + 1) % images[type].length;
     selected[type] = num;
 
@@ -129,13 +138,22 @@ function change(type) {
 function loaded() {
     notPreLoadedImages -= 1;
 
+    document.getElementById("progress").textContent = Math.round((1 - notPreLoadedImages/numImages)*100) + '%';
+
     if (notPreLoadedImages == 0) {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("buttons").style.display = "block";
         getAnother();
     }
     return true;
 }
 
-function downloadImage() {
+function downloadImage(e) {
+    if (notPreLoadedImages > 0) {
+        e.preventDefault();
+        return;
+    }
+
     var c = document.createElement('canvas');
 
     var img = [
@@ -145,16 +163,16 @@ function downloadImage() {
     ];
 
     if (c.getContext) {
-        c.width = img[0].width + 8;
-        c.height = img[0].height * 3 + 16;
+        c.width = img[0].naturalWidth + 8;
+        c.height = img[0].naturalHeight * 3 + 16;
 
         ctx = c.getContext("2d"), {alpha:false};
 
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, c.width, c.height);
         ctx.drawImage(img[0], 4, 4);
-        ctx.drawImage(img[1], 4, 8 + img[0].height);
-        ctx.drawImage(img[2], 4, 12 + img[0].height + img[1].height);
+        ctx.drawImage(img[1], 4, 8 + img[0].naturalHeight);
+        ctx.drawImage(img[2], 4, 12 + img[0].naturalHeight + img[1].naturalHeight);
 
         var dt = c.toDataURL('image/jpeg');
 
@@ -173,7 +191,7 @@ for (var type = 0; type <= 2; type++) {
     for (var i = 0; i < images[type].length; i++) {
         var preloadLink = document.createElement("link");
         preloadLink.href = getFileName(type, i);
-        preloadLink.rel = "preload";
+        preloadLink.rel = "prefetch";
         preloadLink.as = "image";
         preloadLink.addEventListener("load", loaded);
         document.head.appendChild(preloadLink);

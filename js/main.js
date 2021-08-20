@@ -198,15 +198,14 @@ var support = function support(feature){
         return false;
     }
 };
-var isPrefetchSupported = support('prefetch');
 var isPreloadSupported = support('preload');
 
-if (isPrefetchSupported || isPreloadSupported) {
+if (isPreloadSupported) {
     for (var type = 0; type <= 2; type++) {
         for (var i = 0; i < images[type].length; i++) {
             var preloadLink = document.createElement("link");
             preloadLink.href = getFileName(type, i);
-            preloadLink.rel = isPrefetchSupported ? "prefetch" : "preload";
+            preloadLink.rel = "preload";
             preloadLink.as = "image";
             preloadLink.addEventListener("load", loaded);
             document.head.appendChild(preloadLink);
